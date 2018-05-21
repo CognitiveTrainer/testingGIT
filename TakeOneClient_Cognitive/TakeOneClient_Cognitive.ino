@@ -43,7 +43,7 @@
  * Se va a conectar al servidor Wifi con la IP 192.168.1.80
  */
   int             CognServerPort  = 8080;
-  IPAddress       CognServer(192,168,43,80);
+  IPAddress       CognServer(192,168,43,198);
   WiFiClient      CognClient;
 //====================================================================================
 
@@ -109,8 +109,12 @@
   void loop()
   {
 
-    ReadButton();
-  
+    //ReadButton();
+    Serial.println("<" + ButtonColor + "-SCORED>");
+    CognClient.println("<" + ButtonColor + "-SCORED>");
+    CognClient.flush();
+
+    delay(2000);
   }
 
 //====================================================================================
