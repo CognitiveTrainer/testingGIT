@@ -59,7 +59,7 @@
   void loop()
   {
     // Checking For Available Clients
-    //AvailableClients();
+    AvailableClients();
     // Checking For Available Client Messages
     AvailableMessage();
   }
@@ -155,6 +155,7 @@
 
   void AvailableMessage()
   {
+    Serial.println("Available messages?");
     //check clients for data
     for(uint8_t i = 0; i < MAXSC; i++)
     {
@@ -166,6 +167,8 @@
             CognClient[i].flush();
             Serial.println("Client No " + String(i) + " - " + Message);
           }
+      } else {
+        Serial.println("No messages");
       }
     }
   }
@@ -183,8 +186,13 @@
 
     /* in this part it should load the ssid and password 
      * from eeprom they try to connect using them */
+
+    IPAddress ip(192, 168, 43, 81);            // IP address of the server
+    IPAddress gateway(192,168,43,1);           // gateway of your network
+    IPAddress subnet(255,255,255,0);          // subnet mask of your network    
     
     WiFi.mode(WIFI_STA);            // To Avoid Broadcasting An SSID
+    //WiFi.config(ip,gateway,subnet);
     WiFi.begin("Fedeb", "maife3220");      // The SSID That We Want To Connect To
 
     // Printing Message For User That Connetion Is On Process ---------------
@@ -200,14 +208,28 @@
     // Printing IP Address --------------------------------------------------
     Serial.println("Connected To      : " + String(WiFi.SSID()));
     Serial.println("Signal Strenght   : " + String(WiFi.RSSI()) + " dBm");
-    Serial.print  ("Server IP Address : ");
-    Serial.println(CognServer);
-    Serial.print  ("Server Port Num   : ");
-    Serial.println(CognServerPort);
     // Printing MAC Address
     Serial.print  ("Device MC Address : ");
     Serial.println(String(WiFi.macAddress()));
     // Printing IP Address
     Serial.print  ("Device IP Address : ");
     Serial.println(WiFi.localIP());
+  }
+
+//====================================================================================
+
+  void CheckWiFiConnectivity()
+  {
+    while(WiFi.status() != WL_CONNECTED)
+    {
+      for(int i=0; i < 10; i++)
+      {
+        digitalWrite(LED0, !HIGH);
+        delay(250);
+        digitalWrite(LED0, !LOW);
+        delay(250);
+        Serial.print(".");
+      }
+      Serial.println("");
+    }
   }
