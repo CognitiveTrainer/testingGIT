@@ -109,12 +109,12 @@
   void loop()
   {
 
-    //ReadButton();
-    Serial.println("<" + ButtonColor + "-SCORED>");
-    CognClient.println("<" + ButtonColor + "-SCORED>");
-    CognClient.flush();
+    ReadButton();
+    //Serial.println("<" + ButtonColor + "-SCORED>");
+    //CognClient.println("<" + ButtonColor + "-SCORED>");
+    //CognClient.flush();
 
-    delay(2000);
+    //delay(2000);
   }
 
 //====================================================================================
