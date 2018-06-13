@@ -26,7 +26,7 @@ char token[] = TOKEN;
 char clientId[] = "d:" ORG ":" DEVICE_TYPE ":" DEVICE_ID;
 
 const char eventTopic[] = "iot-2/evt/status/fmt/json";
-const char cmdTopic[] = "iot-2/cmd/led/fmt/json";
+const char cmdTopic[] = "iot-2/cmd/rfid/fmt/json";
 
 
 //---------- INFORMATION FROM IBM ---------- 
@@ -41,12 +41,30 @@ void callback(char* topic, byte* payload, unsigned int payloadLength) {
   }
   Serial.println();
 
+  char json[payloadLength + 1];
+  strncpy (json, (char*)payload, payloadLength);
+  json[payloadLength] = '\0';
+  
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& data = jsonBuffer.parseObject((char*)json);
+
+  if (!data.success())
+  {
+    Serial.println("parseObject() failed");
+    return;
+  }
+
+  // Obtener el nombre del método invocado, esto lo envia el switch de la puerta y el knob del motor que están en el dashboard
+  String rfidStatus = String((const char*)data["rfid"]);
+  Serial.print("Estado rfid:");
+  Serial.println(rfidStatus);
+  
   // Switch on the LED if an 1 was received as first character
-  if (payload[0] == 'rfid') {
-    lcdLeerJugador();   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
+  if (rfidStatus == "read") {
+    Serial.print("Entre al if");
+    lcdLeerJugador();  
   } else {
+    Serial.print("No entre al if");
     digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
   }
 
@@ -62,6 +80,7 @@ long lastPublishMillis;
 
 void setup() {
   Serial.begin(9600); Serial.println();
+  client.setCallback(callback);
   pinMode(LED_BUILTIN, OUTPUT);
   wifiConnect();
   mqttConnect();
