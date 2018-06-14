@@ -10,8 +10,8 @@ LiquidCrystal_I2C lcd(0x3F, 16, 2);
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson/releases/tag/v5.0.7
 
 //-- NODEMCU CONNECTION TO IBM --
-const char* ssid = "Fedeb";
-const char* password = "maife3220";
+const char* ssid = "Antel9CA91";
+const char* password = "5029CA91";
 
 #define ORG "9zt3lq"
 #define DEVICE_TYPE "NodeMCU"
@@ -63,25 +63,24 @@ void callback(char* topic, byte* payload, unsigned int payloadLength) {
   if (rfidStatus == "read") {
     Serial.print("Entre al if");
     lcdLeerJugador();  
-  } else {
-    Serial.print("No entre al if");
-    digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
+    while(readRFID());
+  } 
 
 }
 PubSubClient client(server, 1883, callback, wifiClient);
 
 
 
-int publishInterval = 5000; // 5 seconds//Send adc every 5sc
+int publishInterval = 1000; // 5 seconds//Send adc every 5sc
 long lastPublishMillis;
+int rfid=2;
 
 //---------- INITIAL SETUP AND LOOP ---------- 
 
 void setup() {
   Serial.begin(9600); Serial.println();
   client.setCallback(callback);
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(rfid, INPUT);
   wifiConnect();
   mqttConnect();
 
@@ -92,14 +91,16 @@ void setup() {
   
   //Prender luz de fondo
   lcd.backlight();
+  lcdEsperandoComando();
+  
 }
 
 void loop() {
-  if (millis() - lastPublishMillis > publishInterval) {
+  /*if (millis() - lastPublishMillis > publishInterval) {
     publishData();
     lastPublishMillis = millis();
-  }
-
+  }*/
+  
   if (!client.loop()) {
     mqttConnect();
   }
@@ -148,13 +149,57 @@ void publishData() {
   payload += "}}";
 
   //Serial.print("Sending payload: "); Serial.println(payload);
-
+  
   /*if (client.publish(eventTopic, (char*) payload.c_str())) {
     Serial.println("Publish OK");
   } else {
     Serial.println("Publish FAILED");
   }*/
 }
+
+//---------- publishRFID() used to send data to IBM IoT Platform ---------- 
+
+void publishRFID() {
+
+  Serial.println("Entre al publishRFID");
+  
+  String payload = "{\"rfid\":\"12345\"}";
+
+  Serial.print("Sending payload: "); Serial.println(payload);
+  
+  if (client.publish(eventTopic, (char*) payload.c_str())) {
+    Serial.println("Publish OK");
+  } else {
+    Serial.println("Publish FAILED");
+  }
+}
+
+
+//---------- Leer RFID 
+
+bool readRFID() {
+  bool flag = true;
+  int leerBoton = digitalRead(rfid);
+  
+  if(leerBoton == LOW){
+    Serial.println("Entre al leerboton");
+    while(flag) {
+      Serial.println("Entre al while");
+      if(millis() - lastPublishMillis > publishInterval){
+        Serial.println("Entre al if");
+        publishRFID();
+        lastPublishMillis = millis();
+        lcdJugadorLeido();
+        flag=false;
+        return false;
+      }
+    }
+    flag=true;  
+  }
+
+  return true;
+}
+
 
 //---------- lcdLeerJugador used to show text on the display 
 
@@ -192,5 +237,22 @@ void lcdJugadorLeido(){
   lcd.print("deportista: 12345");
 }
 
+//---------- lcdEsperandoComando used to show text on the display
+
+void lcdEsperandoComando(){
+  //Limpiamos pantalla
+  lcd.init();
+  lcd.clear();
+  
+  lcd.home();
+
+  lcd.print("Esperando");
+  
+  // Move the cursor characters to the right and
+  // zero characters down (line 1).
+  lcd.setCursor(0, 1);
+  
+  lcd.print("entrenamiento");
+}
 
 
