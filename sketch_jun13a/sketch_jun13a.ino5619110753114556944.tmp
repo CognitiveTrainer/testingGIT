@@ -90,7 +90,7 @@ long lastPublishMillis;
 void setup() {
   Serial.begin(9600); Serial.println();
   client.setCallback(callback);
-  //pinMode(tag, INPUT);
+  pinMode(rfid, INPUT);
   wifiConnect();
   mqttConnect();
 
@@ -274,7 +274,7 @@ int leerTAG(){
     if(nfc.tagPresent()){
       NfcTag tag = nfc.read();
       tag.print();
-      return tag.getUidString();//Esto es un string hay que convertirlo a int
+      return tag;
     }
   }
   return 0;
