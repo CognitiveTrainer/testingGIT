@@ -38,8 +38,8 @@ int publishInterval = 1000; // 5 seconds//Send adc every 5sc
 long lastPublishMillis;
 
 //-- NODEMCU CONNECTION TO IBM --
-const char* ssid = "HUAWEI-IoT";
-const char* password = "ORTWiFiIoT";
+const char* ssid = "Fedeb";
+const char* password = "maife3220";
 
 #define ORG "0nfqy4"
 #define DEVICE_TYPE "NodeMCU"
@@ -120,6 +120,12 @@ void callback(char* topic, byte* payload, unsigned int payloadLength) {
         publishRFID();
         lastPublishMillis = millis();
         lcdJugadorLeido();
+        int tiempoEspera = millis();
+        int tresSegundos = 3000;
+        while(millis() - tiempoEspera > tresSegundos){
+            
+        }
+        lcdEsperandoEntrenamiento();
         flag=false;
     }  
     //while(readRFID(tag))
@@ -146,7 +152,8 @@ void setup() {
   
   //Prender luz de fondo
   lcd.backlight();
-  lcdEsperandoComando();
+  
+  lcdBienvenidoCT();
   nfc.begin();
   
 }
@@ -272,12 +279,12 @@ void lcdLeerJugador(){
   // zero characters down (line 1).
   lcd.setCursor(0, 1);
   
-  lcd.print("de jugador...");
+  lcd.print("de deportista...");
 }
 
-//---------- lcdEsperandoComando used to show text on the display
+//---------- lcdEsperandoEntrenamiento used to show text on the display
 
-void lcdEsperandoComando(){
+void lcdEsperandoEntrenamiento(){
   //Limpiamos pantalla
   lcd.init();
   lcd.clear();
@@ -293,7 +300,26 @@ void lcdEsperandoComando(){
   lcd.print("entrenamiento");
 }
 
+//---------- lcdBienvenidoCT used to show text on the display
+
+void lcdBienvenidoCT(){
+  //Limpiamos pantalla
+  lcd.init();
+  lcd.clear();
+  
+  lcd.home();
+
+  lcd.print("Bienvenido a");
+  
+  // Move the cursor characters to the right and
+  // zero characters down (line 1).
+  lcd.setCursor(0, 1);
+  
+  lcd.print("CognitiveTrainer");
+}
+
 //------------ leerTAG used to read tag
+
 String leerTAG(){
   //nfc.begin();
   Serial.println("\nScan a NFC tag\n");
