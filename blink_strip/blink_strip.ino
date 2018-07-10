@@ -1,7 +1,7 @@
 #include "FastLED.h"
 
 // How many leds in your strip?
-#define NUM_LEDS 60
+#define NUM_LEDS 120
 
 // For led chips like Neopixels, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
@@ -22,7 +22,7 @@ void setup() {
       //FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
       //FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
-  	  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  	   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
       // FastLED.addLeds<APA104, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<UCS1903, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<UCS1903B, DATA_PIN, RGB>(leds, NUM_LEDS);
@@ -42,19 +42,54 @@ void setup() {
       // FastLED.addLeds<P9813, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<DOTSTAR, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+      FastLED.setBrightness( BRIGHTNESS );
 }
 
 void loop() { 
   // Turn the LED on, then pause
-  for(int i=0;i<NUM_LEDS;i++)
-    leds[i] = CRGB::White;
-    FastLED.setBrightness( BRIGHTNESS );
+
+  
+  turnOnGreen(0);
+  randomSeed(millis());
+  int numAleatorio = random(3);
+
+  if(numAleatorio==0){
+    turnOnGreen(0);
+    turnOnRed(1);
+    turnOnRed(2);
+  } else if(numAleatorio==1){
+    turnOnRed(0);
+    turnOnGreen(1);
+    turnOnRed(2);
+  } else if(numAleatorio==2){
+    turnOnRed(0);
+    turnOnRed(1);
+    turnOnGreen(2);
+  }
   
   FastLED.show();
+
   delay(500);
-  // Now turn the LED off, then pause
+  
+  /* Now turn the LED off, then pause
   for(int i=0;i<NUM_LEDS;i++)
   leds[i] = CRGB::Black;
   FastLED.show();
-  delay(500);
+  delay(500);*/
 }
+
+void turnOnGreen(int pos){
+  int posStart[3]={0,40,80};
+  int posEnd[3]={40,80,120};    
+  for(int i=posStart[pos];i<posEnd[pos];i++)
+    leds[i] = CRGB::Green;
+}
+
+void turnOnRed(int pos){
+  int posStart[3]={0,40,80};
+  int posEnd[3]={40,80,120};    
+  for(int i=posStart[pos];i<posEnd[pos];i++)
+    leds[i] = CRGB::Red;
+}
+
+
