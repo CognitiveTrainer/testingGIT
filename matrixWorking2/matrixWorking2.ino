@@ -68,11 +68,11 @@ void loop() {
   } else if(numAleatorio==1){
     displayCross(0);
     displayTick(1);
-    displayScuare(2);
+    displayDiamond(2);
   } else if(numAleatorio==2){
     displayCross(0);
     displayCross(1);
-    displayScuare(2);
+    displayAlien(2);
   }
 
   
@@ -121,6 +121,34 @@ void displayScuare(int pos){
   display.setColumn(numeroColumna[pos][5],0xC3);
   display.setColumn(numeroColumna[pos][6],0xFF);
   display.setColumn(numeroColumna[pos][7],0xFF); 
+
+  display.update();
+}
+
+void displayAlien(int pos){
+  
+  display.setColumn(numeroColumna[pos][0],0x18);
+  display.setColumn(numeroColumna[pos][1],0x3C);
+  display.setColumn(numeroColumna[pos][2],0x66);
+  display.setColumn(numeroColumna[pos][3],0xDB);
+  display.setColumn(numeroColumna[pos][4],0xDB);
+  display.setColumn(numeroColumna[pos][5],0x66);
+  display.setColumn(numeroColumna[pos][6],0x3C);
+  display.setColumn(numeroColumna[pos][7],0x18); 
+
+  display.update();
+}
+
+void displayDiamond(int pos){
+  
+  display.setColumn(numeroColumna[pos][0],0x00);
+  display.setColumn(numeroColumna[pos][1],0x66);
+  display.setColumn(numeroColumna[pos][2],0x66);
+  display.setColumn(numeroColumna[pos][3],0x06);
+  display.setColumn(numeroColumna[pos][4],0x06);
+  display.setColumn(numeroColumna[pos][5],0x66);
+  display.setColumn(numeroColumna[pos][6],0x66);
+  display.setColumn(numeroColumna[pos][7],0x00); 
 
   display.update();
 }
