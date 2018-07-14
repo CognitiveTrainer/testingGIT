@@ -34,8 +34,11 @@
 #include <FC16.h>
 
 const int csPin = D8;			// CS pin used to connect FC16
-const int displayCount = 1;		// Number of displays; usually 4 or 8
+const int displayCount = 3;		// Number of displays; usually 4 or 8
 const int scrollDelay = 1000;		// Scrolling speed - pause in ms
+const int cantMatriz =3;
+const int cantColumna =8;
+int numeroColumna[3][8];
 
 FC16 display = FC16(csPin, displayCount);
 
@@ -43,43 +46,67 @@ void setup() {
 	display.begin();			// turn on display
 	display.setIntensity(8);	// set medium brightness
 	display.clearDisplay();		// turn all LED off
+  int auxiliar=0;
+  for(int i=0;i<3;i++){
+    for (int j=0;j<8;j++){
+      numeroColumna[i][j]=auxiliar;
+      auxiliar++;
+    }
+  }
 }
 
 void loop() {
-  displayCross();
-  // Wait for 30 ms
-  delay(scrollDelay);
+
+  randomSeed(millis());
+  int numAleatorio = random(3);
+
+
+  if(numAleatorio==0){
+    displayTick(0);
+    displayCross(1);
+    displayCross(2);
+  } else if(numAleatorio==1){
+    displayCross(0);
+    displayTick(1);
+    displayCross(2);
+  } else if(numAleatorio==2){
+    displayCross(0);
+    displayCross(1);
+    displayTick(2);
+  }
+
   
-  displayTick();
-  // Wait for 30 ms
+
+  
   delay(scrollDelay);  
 }
 
-void displayTick(){
+void displayTick(int pos){
   
-  display.setColumn(0,0x60);
-  display.setColumn(1,0x30);
-  display.setColumn(2,0x18);
-  display.setColumn(3,0x0C);
-  display.setColumn(4,0x06);
-  display.setColumn(5,0x03);
-  display.setColumn(6,0x06);
-  display.setColumn(7,0x0C); 
+  display.setColumn(numeroColumna[pos][0],0x60);
+  display.setColumn(numeroColumna[pos][1],0x30);
+  display.setColumn(numeroColumna[pos][2],0x18);
+  display.setColumn(numeroColumna[pos][3],0x0C);
+  display.setColumn(numeroColumna[pos][4],0x06);
+  display.setColumn(numeroColumna[pos][5],0x03);
+  display.setColumn(numeroColumna[pos][6],0x06);
+  display.setColumn(numeroColumna[pos][7],0x0C); 
 
   display.update();
 }
 
-void displayCross(){
+void displayCross(int pos){
   
-  display.setColumn(0,0x81);
-  display.setColumn(1,0x42);
-  display.setColumn(2,0x24);
-  display.setColumn(3,0x18);
-  display.setColumn(4,0x18);
-  display.setColumn(5,0x24);
-  display.setColumn(6,0x42);
-  display.setColumn(7,0x81); 
+  display.setColumn(numeroColumna[pos][0],0x81);
+  display.setColumn(numeroColumna[pos][1],0x42);
+  display.setColumn(numeroColumna[pos][2],0x24);
+  display.setColumn(numeroColumna[pos][3],0x18);
+  display.setColumn(numeroColumna[pos][4],0x18);
+  display.setColumn(numeroColumna[pos][5],0x24);
+  display.setColumn(numeroColumna[pos][6],0x42);
+  display.setColumn(numeroColumna[pos][7],0x81); 
 
+  
   display.update();
 }
 
