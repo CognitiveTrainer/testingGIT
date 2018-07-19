@@ -250,7 +250,7 @@
   String AvailableMessage()
   { 
     ESP.wdtFeed();
-    Serial.println("Available messages?");
+    //Serial.println("Available messages?");
     //check clients for data
     for(uint8_t i = 0; i < MAXSC; i++)
     {
@@ -563,36 +563,38 @@
     int errorTotal=0;
     int tiempoTotal=0;
     
-    for(int i=0; i<repeticiones.toInt(); i++){
-      if(modo.equals("1")){
-        CheckWiFiConnectivity();
-        CognClient[0].write("startSimple");
-        CognClient[0].flush();  
-      } else {
-        CheckWiFiConnectivity();
-        CognClient[0].write("startSimon");
-        CognClient[0].flush();  
-      }
-      String retornoCruce = AvailableMessage();
-      while(retornoCruce.equals("False")){
-        ESP.wdtFeed();
-        retornoCruce = AvailableMessage();
-      }
-      String error = getValue(retornoCruce,',',0);
-      Serial.println(error);
-      String tiempo = getValue(retornoCruce,',',1);
-      Serial.println(tiempo);
-      errorTiempo[0][i]=error.toInt();
-      errorTiempo[1][i]=tiempo.toInt();
+    if(modo.equals("1")){
+      CheckWiFiConnectivity();
+      char* tipoRep = "Simple,";
+      char* RepChar = new char [repeticiones.length()+1];
+      strcpy (RepChar, repeticiones.c_str());
+      tipoRep = strcat(tipoRep,RepChar);
+      Serial.println(tipoRep);
+      CognClient[0].write(tipoRep);
+      CognClient[0].flush();  
+      delete[] RepChar;
+    } else {
+      CheckWiFiConnectivity();
+      char* tipoRep = "Simon,";
+      char* RepChar;
+      strcpy (RepChar, repeticiones.c_str());
+      tipoRep = strcat(tipoRep,RepChar);
+      CognClient[0].write(tipoRep);
+      CognClient[0].flush();  
+      delete[] RepChar;
+    }
+    String retornoCruce = AvailableMessage();
+    while(retornoCruce.equals("False")){
+      ESP.wdtFeed();
+      retornoCruce = AvailableMessage();
+    }
+    String error = getValue(retornoCruce,',',0);
+    Serial.println(error);
+    String tiempo = getValue(retornoCruce,',',1);
+    Serial.println(tiempo);
+    
+    float tiempoLCD = tiempo.toInt()/1000;
+    lcdErroresTiempo(error, String(tiempoLCD)); 
 
-      errorTotal = errorTotal + error.toInt();
-      tiempoTotal = tiempoTotal + tiempo.toInt();
-      
-      float tiempoLCD = tiempo.toInt()/1000;
-      lcdErroresTiempo(error, String(tiempoLCD));
-    }  
-
-    Serial.println(errorTotal);
-    Serial.println(tiempoTotal);
-    publishCruceTiempoError(EntrenaID, String(errorTotal), String(tiempoTotal));
+    publishCruceTiempoError(EntrenaID, error, tiempo);
   }

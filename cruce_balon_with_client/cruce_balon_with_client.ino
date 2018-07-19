@@ -48,7 +48,6 @@ CRGB LEDS_STRIPS[NUM_STRIPS][NUM_LEDS];
 // Variables para cualquier entrenamiento
 int timeStart = 0;
 int timeStop = 0;
-int timeTotal = 0;
 
 // Variables para entrenamiento Simon
 const int sequenceMax = 5;
@@ -126,11 +125,15 @@ void loop() {
   CheckWiFiConnectivity();
 
   if (CognClient.available() > 0) {
-    String c = CognClient.readStringUntil('\r');
-    if(c.equals("startSimon")){
-      cruceSimon();
-    } else if(c.equals("startSimple")){
-      cruceSimple();
+    String tipoRep = CognClient.readStringUntil('\r');
+    String tipo = getValue(tipoRep,',',0);
+    String repeticion = getValue(tipoRep,',',1);
+      Serial.println(tipo);
+      Serial.println(repeticion);
+    if(tipo.equals("Simon")){
+      cruceSimon(repeticion.toInt());
+    } else if(tipo.equals("Simple")){
+      cruceSimple(repeticion.toInt());
     }
   }
 }
@@ -139,70 +142,77 @@ void loop() {
 // -- Funcion cruceSimple() para el modo de entrenamiento Simple --
 // ----------------------------------------------------------------
 
-void cruceSimple(){
-  Serial.print("Comienzo");
-    
-  randomSeed(millis());
-  int numAleatorio = random(3);
-  
-  int cruce = -1;
-  int correcto = 0;
+void cruceSimple(int repeticion){
+  Serial.println("Comienzo");
+  Serial.println(repeticion);
   int error = 0;
-
-  Serial.print("Numero aleatorio: ");
-  Serial.println(numAleatorio);
-  
-  if(numAleatorio==0){
-    turnOnGreen(0);
-    turnOnRed(1);
-    turnOnRed(2);
-  } else if(numAleatorio==1){
-    turnOnRed(0);
-    turnOnGreen(1);
-    turnOnRed(2);
-  } else if(numAleatorio==2){
-    turnOnRed(0);
-    turnOnRed(1);
-    turnOnGreen(2);
-  }
-  
-  FastLED.show();
-  // Comenzamos a contar el tiempo
-  timeStart = millis();
-
-  cruce=-1;
-  
-  // Vemos por cual de los agujeros cruzó la pelota
-  while(cruce<0){
+  int timeTotal = 0;
+  for(int i=0; i<repeticion; i++){
     ESP.wdtFeed();
-    if(digitalRead(SENSOR_PIN_1)==0){
-      cruce=0;
-    } else if(digitalRead(SENSOR_PIN_2)==0){
-      cruce=1;
-    } else if(digitalRead(SENSOR_PIN_3)==0){
-      cruce=2;
+    
+    randomSeed(millis());
+    int numAleatorio = random(3);
+    
+    int cruce = -1;
+    int correcto = 0;
+  
+    Serial.print("Numero aleatorio: ");
+    Serial.println(numAleatorio);
+    
+    if(numAleatorio==0){
+      turnOnGreen(0);
+      turnOnRed(1);
+      turnOnRed(2);
+    } else if(numAleatorio==1){
+      turnOnRed(0);
+      turnOnGreen(1);
+      turnOnRed(2);
+    } else if(numAleatorio==2){
+      turnOnRed(0);
+      turnOnRed(1);
+      turnOnGreen(2);
     }
-  }
-  turnOnBlue(cruce);
-  FastLED.show();
-  tiempoEsperaLed(400); 
-  // Guardamos el tiempo que tardó en finalizar el juego
-  timeTotal = millis() - timeStart;
+    
+    FastLED.show();
+    // Comenzamos a contar el tiempo
+    timeStart = millis();
   
-  if(cruce == numAleatorio){
-    correcto++;
-  } else{
-    error++;
+    cruce=-1;
+    
+    // Vemos por cual de los agujeros cruzó la pelota
+    while(cruce<0){
+      ESP.wdtFeed();
+      if(digitalRead(SENSOR_PIN_1)==0){
+        cruce=0;
+      } else if(digitalRead(SENSOR_PIN_2)==0){
+        cruce=1;
+      } else if(digitalRead(SENSOR_PIN_3)==0){
+        cruce=2;
+      }
+    }
+    turnOnBlue(cruce);
+    FastLED.show();
+    tiempoEsperaLed(400); 
+    // Guardamos el tiempo que tardó en finalizar el juego
+    timeTotal = timeTotal + (millis() - timeStart);
+    
+    if(cruce == numAleatorio){
+      correcto++;
+    } else{
+      error++;
+    }
+    
+    Serial.print("Cruce: ");
+    Serial.println(cruce);
+    Serial.print("Correcto: ");
+    Serial.println(correcto);
+    Serial.print("Error: ");
+    Serial.println(error);  
   }
-  
-  Serial.print("Cruce: ");
-  Serial.println(cruce);
-  Serial.print("Correcto: ");
-  Serial.println(correcto);
-  Serial.print("Error: ");
+
+  Serial.print("Error total: ");
   Serial.println(error);
-
-
+  
   retornoErrorTiempo(error,timeTotal);
   
   delay(500);
@@ -212,10 +222,10 @@ void cruceSimple(){
 // -- Funcion cruceSimon() para el modo de entrenamiento Simon --
 // --------------------------------------------------------------
 
-void cruceSimon(){
+void cruceSimon(int repeticion){
   Serial.println("Simon entro");
   bool error=false;
-  
+  int timeTotal = 0;
   // Pongo nivel actual en 0
   level=0;
   
@@ -455,3 +465,22 @@ void retornoErrorTiempo(int errorRet, int tiempoRet){
   CognClient.flush();
 }
 
+
+//====================================================================================
+
+  String getValue(String data, char separator, int index)
+  {
+    int found = 0;
+    int strIndex[] = {0, -1};
+    int maxIndex = data.length()-1;
+  
+    for(int i=0; i<=maxIndex && found<=index; i++){
+      if(data.charAt(i)==separator || i==maxIndex){
+          found++;
+          strIndex[0] = strIndex[1]+1;
+          strIndex[1] = (i == maxIndex) ? i+1 : i;
+      }
+    }
+  
+    return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
+  }
