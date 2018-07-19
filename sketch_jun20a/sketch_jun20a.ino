@@ -38,8 +38,8 @@ int publishInterval = 1000; // 5 seconds//Send adc every 5sc
 long lastPublishMillis;
 
 //-- NODEMCU CONNECTION TO IBM --
-const char* ssid = "Fedeb";
-const char* password = "maife3220";
+const char* ssid = "Antel9CA91";
+const char* password = "5029CA91";
 
 #define ORG "0nfqy4"
 #define DEVICE_TYPE "NodeMCU"
@@ -80,6 +80,8 @@ void lcdJugadorLeido(){
 
 WiFiClient wifiClient;
 void callback(char* topic, byte* payload, unsigned int payloadLength) {
+  Serial.print("Length: ");
+  Serial.println(payloadLength);
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
@@ -100,11 +102,13 @@ void callback(char* topic, byte* payload, unsigned int payloadLength) {
     Serial.println("parseObject() failed");
     return;
   }
-
-  // Obtener el nombre del método invocado, esto lo envia el switch de la puerta y el knob del motor que están en el dashboard
+  
+  // Obtenemos datos del payload recibido y lo pasamos a variables
   String rfidStatus = String((const char*)data["rfid"]);
   Serial.print("Estado rfid:");
   Serial.println(rfidStatus);
+
+  String EntrenaID = String((const char*)data["EntrenaID"]);
   
   // Switch on the LED if an 1 was received as first character
   if (rfidStatus == "read") {
@@ -127,11 +131,19 @@ void callback(char* topic, byte* payload, unsigned int payloadLength) {
         }
         lcdEsperandoEntrenamiento();
         flag=false;
-    }  
-    //while(readRFID(tag))
-  } 
+      }  
+    } 
+  }
+  if (EntrenaID != ""){
+    String toggleHit = String((const char*)data["toggleHit"]);
+    String tipoHit = String((const char*)data["tipoHit"]);
+    String repHit = String((const char*)data["repHit"]);
+    String toggleCruce = String((const char*)data["toggleCruce"]);
+    String tipoCruce = String((const char*)data["tipoCruce"]);
+    String repCruce = String((const char*)data["repCruce"]);
+    String serie = String((const char*)data["serie"]);
 
-}
+  }
 }
 
 PubSubClient client(server, 1883, callback, wifiClient);

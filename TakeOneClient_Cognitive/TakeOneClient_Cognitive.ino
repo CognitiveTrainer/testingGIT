@@ -41,7 +41,7 @@ char*         password;        // Wifi Password
    Se va a conectar al servidor Wifi con la IP 192.168.1.80
 */
 int             CognServerPort  = 8080;
-IPAddress       CognServer(192, 168, 43, 198);
+IPAddress       CognServer(192, 168, 1, 198);
 WiFiClient      CognClient;
 //====================================================================================
 
@@ -70,7 +70,7 @@ void setup()
      from eeprom they try to connect using them */
 
   WiFi.mode(WIFI_STA);            // To Avoid Broadcasting An SSID
-  WiFi.begin("Fedeb", "maife3220");      // The SSID That We Want To Connect To
+  WiFi.begin("Antel9CA91", "5029CA91");      // The SSID That We Want To Connect To
 
   // Printing Message For User That Connetion Is On Process ---------------
   Serial.println("!--- Connecting To " + WiFi.SSID() + " ---!");
@@ -104,8 +104,17 @@ void setup()
 
 void loop()
 {
-
+  CheckWiFiConnectivity();
+  
   ReadButton();
+  
+  if (CognClient.available() > 0) {
+    String c = CognClient.readStringUntil('\r');
+    if(c.equals("start")){
+      Serial.println("Comienza juego");  
+    }
+  }
+  //delay(500);
   //Serial.println("<" + ButtonColor + "-SCORED>");
   //CognClient.println("<" + ButtonColor + "-SCORED>");
   //CognClient.flush();
@@ -136,8 +145,9 @@ void ReadButton()
       if (ButtonState == LOW)
       {
         CheckWiFiConnectivity();
-        Serial.println("<" + ButtonColor + "-SCORED>");
-        CognClient.println("<" + ButtonColor + "-SCORED>");
+        String retorno = "{errores: 1, tiempo: 2}";
+        Serial.println(retorno);
+        CognClient.print (retorno);
         CognClient.flush();
       }
     }
@@ -176,8 +186,8 @@ void CognRequest()
   // If Sucessfully Connected Send Connection Message
   if (CognClient.connect(CognServer, CognServerPort))
   {
-    Serial.println    ("<" + ButtonColor + "-CONNECTED>");
-    CognClient.println ("<" + ButtonColor + "-CONNECTED>");
+    Serial.println("Conectado");
+    CognClient.print ("Conectado");
   }
 }
 
