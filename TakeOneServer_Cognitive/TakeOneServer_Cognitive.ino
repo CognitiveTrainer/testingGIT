@@ -46,7 +46,7 @@
   #define     BUTTON    D0          // Connectivity ReInitiate Button
   
 //------------------------------------------------------------------------------------
-  #define     MAXSC     2           // MAXIMUM NUMBER OF CLIENTS
+  #define     MAXSC     3           // MAXIMUM NUMBER OF CLIENTS
 
 //=========  VARIABLES =======
   String rfid="0";
@@ -54,8 +54,8 @@
   long lastPublishMillis;
 
 //=========  NODEMCU CONNECTION TO IBM =======
-  const char* ssid = "Antel9CA91";
-  const char* password = "5029CA91";
+  const char* ssid = "Fedeb";
+  const char* password = "maife3220";
   
   #define ORG "0nfqy4"
   #define DEVICE_TYPE "NodeMCU"
@@ -145,6 +145,9 @@
         if(toggleCruce.equals("1")){
           startCruce(EntrenaID, tipoCruce, repCruce);
         }
+        if(toggleHit.equals("1")){
+          startHit(EntrenaID, tipoCruce, repCruce);
+        }
       }
     }
   }
@@ -223,7 +226,8 @@
           if(CognClient[i] = CognServer.available())
           {
             Serial.println("New Client: " + String(i));
-            String pepe = AvailableMessage();
+            String tempRetorno = AvailableMessage();
+            Serial.println(tempRetorno);
           }
 
           // Continue Scanning
@@ -286,7 +290,7 @@
      * from eeprom they try to connect using them */
 
     IPAddress ip(192, 168, 1, 198);            // IP address of the server
-    IPAddress gateway(192,168,1,1);           // gateway of your network
+    IPAddress gateway(192,168,43,1);           // gateway of your network
     IPAddress subnet(255,255,255,0);          // subnet mask of your network    
     
     WiFi.mode(WIFI_STA);            // To Avoid Broadcasting An SSID
@@ -558,6 +562,54 @@
 
 //======= COMIENZO DE FUNCIONES QUE ENVIO A PLACAS ======//
 
+  void startHit(String EntrenaID, String modo, String repeticiones) {
+    int errorTiempo[1][repeticiones.toInt()];
+    int errorTotal=0;
+    int tiempoTotal=0;
+    
+    if(modo.equals("1")){
+      CheckWiFiConnectivity();
+      String simple = "Simple,";
+      String RepChar = simple + repeticiones;
+      
+      char repc[20];
+      RepChar.toCharArray(repc,10);
+      strcpy (repc, RepChar.c_str());
+      
+      Serial.println(RepChar);
+      Serial.println(repc);
+      CognClient[1].write(repc);
+      CognClient[1].flush();  
+    } else {
+      CheckWiFiConnectivity();
+      String simon = "Simon,";
+      String RepChar = simon + repeticiones;
+      Serial.println(RepChar);
+      
+      char repc[20];
+      RepChar.toCharArray(repc,10);
+      strcpy (repc, RepChar.c_str());
+      
+      Serial.println(repc);
+      CognClient[1].write(repc);
+      CognClient[1].flush();  
+    }
+    String retornoCruce = AvailableMessage();
+    while(retornoCruce.equals("False")){
+      ESP.wdtFeed();
+      retornoCruce = AvailableMessage();
+    }
+    String error = getValue(retornoCruce,',',0);
+    Serial.println(error);
+    String tiempo = getValue(retornoCruce,',',1);
+    Serial.println(tiempo);
+    
+    float tiempoLCD = tiempo.toInt()/1000;
+    lcdErroresTiempo(error, String(tiempoLCD)); 
+
+    publishCruceTiempoError(EntrenaID, error, tiempo);
+  }
+
   void startCruce(String EntrenaID, String modo, String repeticiones) {
     int errorTiempo[1][repeticiones.toInt()];
     int errorTotal=0;
@@ -565,23 +617,30 @@
     
     if(modo.equals("1")){
       CheckWiFiConnectivity();
-      char* tipoRep = "Simple,";
-      char* RepChar = new char [repeticiones.length()+1];
-      strcpy (RepChar, repeticiones.c_str());
-      tipoRep = strcat(tipoRep,RepChar);
-      Serial.println(tipoRep);
-      CognClient[0].write(tipoRep);
+      String simple = "Simple,";
+      String RepChar = simple + repeticiones;
+      
+      char repc[20];
+      RepChar.toCharArray(repc,10);
+      strcpy (repc, RepChar.c_str());
+      
+      Serial.println(RepChar);
+      Serial.println(repc);
+      CognClient[0].write(repc);
       CognClient[0].flush();  
-      delete[] RepChar;
     } else {
       CheckWiFiConnectivity();
-      char* tipoRep = "Simon,";
-      char* RepChar;
-      strcpy (RepChar, repeticiones.c_str());
-      tipoRep = strcat(tipoRep,RepChar);
-      CognClient[0].write(tipoRep);
+      String simon = "Simon,";
+      String RepChar = simon + repeticiones;
+      Serial.println(RepChar);
+      
+      char repc[20];
+      RepChar.toCharArray(repc,10);
+      strcpy (repc, RepChar.c_str());
+      
+      Serial.println(repc);
+      CognClient[0].write(repc);
       CognClient[0].flush();  
-      delete[] RepChar;
     }
     String retornoCruce = AvailableMessage();
     while(retornoCruce.equals("False")){

@@ -11,6 +11,9 @@
 #define FASTLED_ESP8266_D1_PIN_ORDER
 #include "FastLED.h"
 
+  const char* ssid = "Fedeb";
+  const char* password = "maife3220";
+
 // Static pins NodeMCU
 //    static const uint8_t D0   = 16;
 //    static const uint8_t D1   = 5;
@@ -63,7 +66,7 @@ int level;
    Se va a conectar al servidor Wifi con la IP 192.168.1.80
 */
 int             CognServerPort  = 8080;
-IPAddress       CognServer(192, 168, 1, 49);
+IPAddress       CognServer(192, 168, 43, 209);
 WiFiClient      CognClient;
 
 void setup() { 
@@ -88,7 +91,7 @@ void setup() {
      from eeprom they try to connect using them */
 
       WiFi.mode(WIFI_STA);            // To Avoid Broadcasting An SSID
-      WiFi.begin("Antel9CA91", "5029CA91");      // The SSID That We Want To Connect To
+      WiFi.begin(ssid, password);      // The SSID That We Want To Connect To
       
       // Printing Message For User That Connetion Is On Process ---------------
       Serial.println("!--- Connecting To " + WiFi.SSID() + " ---!");
@@ -116,14 +119,18 @@ void setup() {
 
       // Conecting The Device As A Client -------------------------------------
       CognRequest();
+
+      showCyanAll();
       
 }
 
 void loop() { 
-  //cruceSimple();
-  //cruceSimon();
   CheckWiFiConnectivity();
 
+  if (!CognClient.connected()) {
+    CognRequest();
+  }
+  
   if (CognClient.available() > 0) {
     String tipoRep = CognClient.readStringUntil('\r');
     String tipo = getValue(tipoRep,',',0);
@@ -132,8 +139,12 @@ void loop() {
       Serial.println(repeticion);
     if(tipo.equals("Simon")){
       cruceSimon(repeticion.toInt());
+      tiempoEsperaLed(400);
+      showCyanAll();
     } else if(tipo.equals("Simple")){
       cruceSimple(repeticion.toInt());
+      tiempoEsperaLed(400);
+      showCyanAll();
     }
   }
 }
@@ -231,7 +242,7 @@ void cruceSimon(int repeticion){
   
   generateSequence();
   timeStart=millis();
-  while(level<=sequenceMax && error==false){
+  while(level<repeticion && error==false){
     level++;
     Serial.print("Nivel: ");
     Serial.println(level);
@@ -242,12 +253,12 @@ void cruceSimon(int repeticion){
   timeTotal=millis()-timeStart;
   
   if(error){
-    endGame();
     retornoErrorTiempo(1, timeTotal);
+    endGame();
   }
   else{
-    endGameCorrect();
     retornoErrorTiempo(0, timeTotal);
+    endGameCorrect();
   }
 }
 
@@ -370,11 +381,23 @@ void turnOnBlack(int pos){
   for(int i=0;i<NUM_LEDS;i++)
     LEDS_STRIPS[pos][i] = CRGB::Black;
 }
+void turnOnCyan(int pos){
+  //Serial.println("Turn on Cyan");
+  for(int i=0;i<NUM_LEDS;i++)
+    LEDS_STRIPS[pos][i] = CRGB::Cyan;
+}
 
 void showWhiteAll(){
   turnOnWhite(0);
   turnOnWhite(1);
   turnOnWhite(2);
+  FastLED.show();
+}
+
+void showCyanAll(){
+  turnOnCyan(0);
+  turnOnCyan(1);
+  turnOnCyan(2);
   FastLED.show();
 }
 
