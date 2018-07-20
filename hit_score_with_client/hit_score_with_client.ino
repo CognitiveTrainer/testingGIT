@@ -17,8 +17,8 @@
 
   FC16 display = FC16(csPin, displayCount);
 
-  const char* ssid = "Fedeb";
-  const char* password = "maife3220";
+  const char* ssid = "HUAWEI-IoT";
+  const char* password = "ORTWiFiIoT";
 
 // Static pins NodeMCU
 //    static const uint8_t D0   = 16;
@@ -58,7 +58,7 @@
    Se va a conectar al servidor Wifi con la IP 192.168.1.80
 */
   int             CognServerPort  = 8080;
-  IPAddress       CognServer(192, 168, 43, 209);
+  IPAddress       CognServer(192, 168, 1, 102);
   WiFiClient      CognClient;
   
   void setup() { 
@@ -116,6 +116,9 @@
   
     // Conecting The Device As A Client -------------------------------------
     CognRequest();      
+    displayCT(0);
+    displayCT(1);
+    displayCT(2);
 }
 
   void loop() { 
@@ -186,11 +189,11 @@
       // Vemos por cual de los agujeros cruzó la pelota
       while(golpe<0){
         ESP.wdtFeed();
-        if(digitalRead(SENSOR_PIN_1)==0){
+        if(digitalRead(SENSOR_PIN_1)==1){
           golpe=0;
-        } else if(digitalRead(SENSOR_PIN_2)==0){
+        } else if(digitalRead(SENSOR_PIN_2)==1){
           golpe=1;
-        } else if(digitalRead(SENSOR_PIN_3)==0){
+        } else if(digitalRead(SENSOR_PIN_3)==1){
           golpe=2;
         }
       }
@@ -244,7 +247,7 @@ void hitSimon(int repeticion){
   }
 
   timeTotal=millis()-timeStart;
-  
+
   if(error){
     retornoErrorTiempo(1, timeTotal);
     endGame();
@@ -253,6 +256,10 @@ void hitSimon(int repeticion){
     retornoErrorTiempo(0, timeTotal);
     endGameCorrect();
   }
+
+  displayCT(0);
+  displayCT(1);
+  displayCT(2);
 }
 
 void generateSequence()
@@ -283,8 +290,8 @@ void showSequence(){
       displayClear(2);
     } else if(sequence[i]==2){
       displayClear(0);
-      displayAlien(1);
-      displayClear(2);
+      displayClear(1);
+      displayAlien(2);
     }
     tiempoEsperaLed(1000);
   }
@@ -313,15 +320,15 @@ bool getSequence(){
     int golpe=-1;
     while(flag==false){
       ESP.wdtFeed();
-      if(digitalRead(SENSOR_PIN_1)==0){
+      if(digitalRead(SENSOR_PIN_1)==1){
         golpe=0;
         displayDiamondInvert(0);
         flag=true;
-      } else if(digitalRead(SENSOR_PIN_2)==0){
+      } else if(digitalRead(SENSOR_PIN_2)==1){
         golpe=1;
         displaySquareInvert(1);
         flag=true;
-      } else if(digitalRead(SENSOR_PIN_3)==0){
+      } else if(digitalRead(SENSOR_PIN_3)==1){
         golpe=2;
         displayAlienInvert(2);
         flag=true;
@@ -582,7 +589,7 @@ void CognRequest()
   // If Sucessfully Connected Send Connection Message
   if (CognClient.connect(CognServer, CognServerPort))
   {
-    Serial.println("Conectado");
+    Serial.println("Imprimiendo: Conectado");
     CognClient.print ("Conectado");
   }
 }

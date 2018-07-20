@@ -54,8 +54,8 @@
   long lastPublishMillis;
 
 //=========  NODEMCU CONNECTION TO IBM =======
-  const char* ssid = "Fedeb";
-  const char* password = "maife3220";
+  const char* ssid = "HUAWEI-IoT";
+  const char* password = "ORTWiFiIoT";
   
   #define ORG "0nfqy4"
   #define DEVICE_TYPE "NodeMCU"
@@ -146,7 +146,7 @@
           startCruce(EntrenaID, tipoCruce, repCruce);
         }
         if(toggleHit.equals("1")){
-          startHit(EntrenaID, tipoCruce, repCruce);
+          startHit(EntrenaID, tipoHit, repHit);
         }
       }
     }
@@ -221,7 +221,6 @@
           {
             CognClient[i].stop();
           }
-
           // Checks If Clients Connected To The Server
           if(CognClient[i] = CognServer.available())
           {
@@ -229,12 +228,10 @@
             String tempRetorno = AvailableMessage();
             Serial.println(tempRetorno);
           }
-
           // Continue Scanning
           continue;
         }
       }
-      
       //no free/disconnected spot so reject
       WiFiClient CognClient = CognServer.available();
       CognClient.stop();
@@ -260,19 +257,22 @@
     {
       if (CognClient[i] && CognClient[i].connected() && CognClient[i].available())
       {
-            Serial.print("Cliente: ");
-            Serial.println(i);
+        Serial.print("Cliente: ");
+        Serial.println(i);
+        Serial.print("Available: ");
+        Serial.println(CognClient[i].available());
+        while(CognClient[i].available())
+          {
             Serial.print("Sigo en available: ");
             Serial.println(CognClient[i].available());
             String Message = CognClient[i].readStringUntil('\r');
             CognClient[i].flush();
             Serial.println(Message);
             return Message;
-            delay(250);
-      } else {
-        return "False";
-      }
+          }
+      } 
     }
+    return "False";
   }
 
 //====================================================================================
@@ -289,7 +289,7 @@
     /* in this part it should load the ssid and password 
      * from eeprom they try to connect using them */
 
-    IPAddress ip(192, 168, 1, 198);            // IP address of the server
+    IPAddress ip(192, 168, 1, 102);            // IP address of the server
     IPAddress gateway(192,168,43,1);           // gateway of your network
     IPAddress subnet(255,255,255,0);          // subnet mask of your network    
     
@@ -419,7 +419,11 @@
   
     Serial.print("Sending payload: "); Serial.println(payload);
     
-    if (client.publish(eventTopic, (char*) payload.c_str())) {
+    int pepe = client.publish(eventTopic, (char*) payload.c_str());
+
+    Serial.println(pepe);
+    
+    if (pepe) {
       Serial.println("Publish OK");
     } else {
       Serial.println("Publish FAILED");
@@ -429,6 +433,8 @@
 //=========  publishCruceTiempoError() used to send data to IBM IoT Platform ========= 
 
   void publishCruceTiempoError(String EntrenaID, String error, String tiempo) {
+    CheckWiFiConnectivity();
+    
     if (!client.loop()) {
       mqttConnect();
     }
@@ -559,6 +565,81 @@
     return "0";
   }
 
+//---------- lcdLeerJugador used to show text on the display
+  void lcdJugarSimonCruce(){
+    //Limpiamos pantalla
+    lcd.init();
+    lcd.clear();
+    
+    lcd.home();
+  
+    lcd.print("Comienza cruce");
+    
+    // Move the cursor characters to the right and
+    // zero characters down (line 1).
+    lcd.setCursor(0, 1);
+
+    lcd.print("Modo: Simon");
+    
+    lcd.print(rfid);
+  }
+
+//---------- lcdLeerJugador used to show text on the display
+  void lcdJugarSimonHit(){
+    //Limpiamos pantalla
+    lcd.init();
+    lcd.clear();
+    
+    lcd.home();
+  
+    lcd.print("Comienza Hit");
+    
+    // Move the cursor characters to the right and
+    // zero characters down (line 1).
+    lcd.setCursor(0, 1);
+
+    lcd.print("Modo: Simon");
+    
+    lcd.print(rfid);
+  }
+
+//---------- lcdLeerJugador used to show text on the display
+  void lcdJugarSimpleCruce(){
+    //Limpiamos pantalla
+    lcd.init();
+    lcd.clear();
+    
+    lcd.home();
+  
+    lcd.print("Comienza Cruce");
+    
+    // Move the cursor characters to the right and
+    // zero characters down (line 1).
+    lcd.setCursor(0, 1);
+
+    lcd.print("Modo: Simple");
+    
+    lcd.print(rfid);
+  }
+
+//---------- lcdLeerJugador used to show text on the display
+  void lcdJugarSimpleHit(){
+    //Limpiamos pantalla
+    lcd.init();
+    lcd.clear();
+    
+    lcd.home();
+  
+    lcd.print("Comienza Hit");
+    
+    // Move the cursor characters to the right and
+    // zero characters down (line 1).
+    lcd.setCursor(0, 1);
+
+    lcd.print("Modo: Simple");
+    
+    lcd.print(rfid);
+  }
 
 //======= COMIENZO DE FUNCIONES QUE ENVIO A PLACAS ======//
 
@@ -575,7 +656,7 @@
       char repc[20];
       RepChar.toCharArray(repc,10);
       strcpy (repc, RepChar.c_str());
-      
+      lcdJugarSimpleHit();
       Serial.println(RepChar);
       Serial.println(repc);
       CognClient[1].write(repc);
@@ -585,7 +666,7 @@
       String simon = "Simon,";
       String RepChar = simon + repeticiones;
       Serial.println(RepChar);
-      
+      lcdJugarSimonHit();
       char repc[20];
       RepChar.toCharArray(repc,10);
       strcpy (repc, RepChar.c_str());
@@ -624,6 +705,8 @@
       RepChar.toCharArray(repc,10);
       strcpy (repc, RepChar.c_str());
       
+      lcdJugarSimpleCruce();
+      
       Serial.println(RepChar);
       Serial.println(repc);
       CognClient[0].write(repc);
@@ -637,7 +720,7 @@
       char repc[20];
       RepChar.toCharArray(repc,10);
       strcpy (repc, RepChar.c_str());
-      
+      lcdJugarSimonCruce();
       Serial.println(repc);
       CognClient[0].write(repc);
       CognClient[0].flush();  

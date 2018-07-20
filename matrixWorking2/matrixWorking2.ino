@@ -35,14 +35,17 @@
 
 const int csPin = D8;			// CS pin used to connect FC16
 const int displayCount = 3;		// Number of displays; usually 4 or 8
-const int scrollDelay = 1000;		// Scrolling speed - pause in ms
+const int scrollDelay = 20;		// Scrolling speed - pause in ms
 const int cantMatriz =3;
 const int cantColumna =8;
 int numeroColumna[3][8];
 
+#define SENSOR_PIN_1 16 // D0
+
 FC16 display = FC16(csPin, displayCount);
 
 void setup() {
+  pinMode(SENSOR_PIN_1,INPUT);
 	display.begin();			// turn on display
 	display.setIntensity(8);	// set medium brightness
 	display.clearDisplay();		// turn all LED off
@@ -56,9 +59,13 @@ void setup() {
 }
 
 void loop() {
-
-  randomSeed(millis());
-  int numAleatorio = random(3);
+  int numAleatorio; 
+  int lectura = digitalRead(SENSOR_PIN_1);
+  if(lectura == 1){
+    randomSeed(millis());
+    numAleatorio = random(3);
+  }
+  
 
 
   if(numAleatorio==0){
@@ -67,15 +74,13 @@ void loop() {
     displayDiamondInvert(2);
   } else if(numAleatorio==1){
     displayCross(0);
-    displayDiamond(1);
-    displayDiamondInvert(2);
+    displayAlien(1);
+    displayAlienInvert(2);
   } else if(numAleatorio==2){
     displayCross(0);
-    displayDiamond(1);
-    displayDiamondInvert(2);
+    displaySquare(1);
+    displaySquareInvert(2);
   }
-
-  
 
   
   delay(scrollDelay);  

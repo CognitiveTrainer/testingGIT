@@ -11,8 +11,8 @@
 #define FASTLED_ESP8266_D1_PIN_ORDER
 #include "FastLED.h"
 
-  const char* ssid = "Fedeb";
-  const char* password = "maife3220";
+  const char* ssid = "HUAWEI-IoT";
+  const char* password = "ORTWiFiIoT";
 
 // Static pins NodeMCU
 //    static const uint8_t D0   = 16;
@@ -28,7 +28,7 @@
 //    static const uint8_t D10  = 1;
 
 // Cantidad de leds por tira y numero total de tiras
-#define NUM_LEDS 40
+#define NUM_LEDS 38
 #define NUM_STRIPS 3
 
 // Definimos pines de sensores y tiras
@@ -66,7 +66,7 @@ int level;
    Se va a conectar al servidor Wifi con la IP 192.168.1.80
 */
 int             CognServerPort  = 8080;
-IPAddress       CognServer(192, 168, 43, 209);
+IPAddress       CognServer(192, 168, 1, 102);
 WiFiClient      CognClient;
 
 void setup() { 
